@@ -149,6 +149,7 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
   protected boolean mAllowsFullscreenVideo = false;
   protected @Nullable String mUserAgent = null;
   protected @Nullable String mUserAgentWithApplicationName = null;
+  protected @Nullable String mCookie = null;
 
   public RNCWebViewManager() {
     mWebViewConfig = new WebViewConfig() {
@@ -224,7 +225,7 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
           urlObj = new URL(url);
           String baseUrl = urlObj.getProtocol() + "://" + urlObj.getHost();
           String cookie = CookieManager.getInstance().getCookie(baseUrl);
-          request.addRequestHeader("Cookie", cookie);
+          request.addRequestHeader("Cookie", mCookie);
         } catch (MalformedURLException e) {
           System.out.println("Error getting cookie for DownloadManager: " + e.toString());
           e.printStackTrace();
@@ -524,10 +525,14 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
           ReadableMapKeySetIterator iter = headers.keySetIterator();
           while (iter.hasNextKey()) {
             String key = iter.nextKey();
+            System.out.println("XXXXXXXX key " + key);
             if ("user-agent".equals(key.toLowerCase(Locale.ENGLISH))) {
               if (view.getSettings() != null) {
                 view.getSettings().setUserAgentString(headers.getString(key));
               }
+            } else if (key.equals("cookie")) {
+              mCookie = headers.getString(key);
+              headerMap.put(key, headers.getString(key));
             } else {
               headerMap.put(key, headers.getString(key));
             }
